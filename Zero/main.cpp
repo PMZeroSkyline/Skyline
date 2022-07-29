@@ -4,20 +4,32 @@
 
 #include <iostream>
 #include <chrono>
+#include <math.h>
 
 bool hit_sphere(const point3& center, double radius, const ray &r)
 {
-    vec3 oc = r.origin() - center;
-    auto a = dot(r.direction(), r.direction());
-    auto b = 2.0 * dot(oc, r.direction());
-    auto c = dot(oc, oc) - radius * radius;
-    auto discriminant = b * b - 4 * a * c;
-    return (discriminant > 0);
+    //// (A - C)
+    //vec3 oc = r.origin() - center;
+    //// t^2b¡¤b
+    //auto a = dot(r.direction(), r.direction());
+    //// 2(A-C)tb
+    //auto b = 2.0 * dot(oc, r.direction());
+    //// (A-C)^2 - r^2
+    //auto c = dot(oc, oc) - radius * radius;
+    //// root number
+    //auto discriminant = b * b - 4 * a * c;
+    //return (discriminant > 0);
+    
+    float oc = (center - r.origin()).length();
+    auto theta = atan2(oc, radius);
+    auto targetTheta = dot(unit_vector(r.direction()), unit_vector(center - r.origin()));
+    
+    return ((targetTheta * 3.14 * 0.5) > theta);
 }
 
 color ray_color(const ray& r)
 {
-    if (hit_sphere(point3(0,0,-1), 0.5, r))
+    if (hit_sphere(point3(0,0,-5), 0.5, r))
     {
         return color(1, 0, 0);
     }
