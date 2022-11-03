@@ -1,1 +1,0 @@
-zero.exe > image.ppm
