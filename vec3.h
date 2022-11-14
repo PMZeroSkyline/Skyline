@@ -1,13 +1,14 @@
 #pragma once
 
-#include <cmath>
-#include <iostream>
-
-using std::sqrt;
+#include "core.h"
 
 class vec3 {
 public:
+
+    double e[3];
+
     vec3() : e{ 0,0,0 } {}
+    vec3(double e0) : e{ e0,e0,e0 } {}
     vec3(double e0, double e1, double e2) : e{ e0, e1, e2 } {}
 
     double x() const { return e[0]; }
@@ -44,8 +45,14 @@ public:
         return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
     }
 
-public:
-    double e[3];
+    inline static vec3 random()
+    {
+        return vec3(random_double(), random_double(), random_double());
+    }
+    inline static vec3 random(double min, double max)
+    {
+        return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+    }
 };
 
 // Type aliases for vec3
@@ -96,4 +103,16 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 normalize(vec3 v) {
     return v / v.length();
+}
+vec3 random_in_unit_sphere()
+{
+    while(true)
+    {
+        vec3 p = vec3::random(-1, 1);
+        if (p.length_squared() >= 1)
+        {
+            continue;
+        }
+        return p;
+    }
 }
