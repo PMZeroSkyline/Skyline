@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RAY_H
+#define RAY_H
 
 #include "vec3.h"
 
@@ -16,3 +17,5 @@ public:
 		return orig + t * dir;
 	}
 };
+
+#endif
