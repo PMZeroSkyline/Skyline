@@ -3,6 +3,7 @@
 
 #include "core.h"
 #include "vec3.h"
+#include "perlin.h"
 
 class texture
 {
@@ -46,6 +47,19 @@ public:
         {
             return even->value(u, v, p);
         }
+    }
+};
+class noise_texture : public texture
+{
+public:
+    perlin noise;
+    double scale = 1;
+
+    noise_texture(){}
+    noise_texture(double sc) : scale(sc){}
+    virtual color value(double u, double v, const point3 &p) const override
+    {
+        return color(1) * 0.5 * (1 + noise.noise_trilinearly_smoothed_shifted(scale * p));
     }
 };
 
