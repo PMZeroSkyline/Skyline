@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <algorithm>
 
 using std::shared_ptr;
 using std::make_shared;
@@ -19,6 +20,9 @@ using std::flush;
 using std::string;
 using std::to_string;
 using std::numeric_limits;
+using std::ostream;
+using std::swap;
+using std::sort;
 
 const double infinity = numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;
@@ -46,5 +50,9 @@ inline double clamp(double x, double min, double max)
         return max;
     }
     return x;
+}
+inline int random_int(int min, int max)
+{
+    return static_cast<int>(random_double(min, max+1));
 }
 #endif

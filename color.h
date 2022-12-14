@@ -2,7 +2,7 @@
 #define COLOR_H
 #include "vec3.h"
 
-void write_color(std::ostream& out, color pixel_color, int samples_per_pixel) 
+void write_color(ostream& out, color pixel_color, int samples_per_pixel) 
 {
     double r = pixel_color.x();
     double g = pixel_color.y();
