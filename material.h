@@ -33,7 +33,7 @@ public:
             scatter_direction = rec.normal;
         }
         
-        scattered = ray(rec.p, scatter_direction);
+        scattered = ray(rec.p, scatter_direction, r_in.tm);
         attenuation = albedo->value(rec.u, rec.v, rec.p);
         return true;
     }
@@ -48,7 +48,7 @@ public:
     virtual bool scatter(const ray &r_in, const hit_record &rec, color &attenuation, ray &scattered) const override
     {
         vec3 reflected = reflect(normalize(r_in.dir), rec.normal);
-        scattered = ray(rec.p, reflected + fuzz * random_in_unit_sphere());
+        scattered = ray(rec.p, reflected + fuzz * random_in_unit_sphere(), r_in.tm);
         attenuation = albedo;
         return (dot(scattered.dir, rec.normal) > 0);
     }
@@ -83,7 +83,7 @@ public:
             direction = refract(unit_direction, rec.normal, refraction_ratio);;
         }
 
-        scattered = ray(rec.p, direction);
+        scattered = ray(rec.p, direction, r_in.tm);
         return true;
     }
     static double reflectance(double cosine, double ref_idx)

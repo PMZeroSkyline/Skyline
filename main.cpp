@@ -10,29 +10,9 @@
 #include "material.h"
 #include "aarect.h"
 #include "box.h"
+#include <thread>
 
-color ray_color(const ray &r, const hittable &world, int depth)
-{
-	if (depth <= 0)
-	{
-		return color(0);
-	}
-	
-	hit_record rec;
-	if (world.hit(r, 0.001, infinity, rec))
-	{
-		ray scattered;
-		color attenuation;
-		if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
-		{
-			return attenuation * ray_color(scattered, world, depth - 1);
-		}
-		return color(0);
-	}
-	vec3 dir = normalize(r.dir);
-	double t = 0.5 * (dir.y() + 1);
-	return color(1 - t) + t * color(0.5, 0.7, 1.0);
-}
+
 color ray_color(const ray &r, const color &background, const hittable &world, int depth)
 {
 	hit_record rec;
@@ -54,6 +34,17 @@ color ray_color(const ray &r, const color &background, const hittable &world, in
 		return emitted;
 	}
 	return emitted + attenuation * ray_color(scattered, background, world, depth-1);
+}
+
+void sample_pixel(int samples_per_pixel, int x, int y, int image_width, int image_height, const camera &cam, color &pixel_color, const color &background, const hittable &world, int max_depth, int id)
+{
+	for (int s = 0; s < samples_per_pixel; s++)
+	{
+		double u = (x + random_double()) / (image_width - 1);
+		double v = (y + random_double()) / (image_height - 1);
+		ray r = cam.get_ray(u, v);
+		pixel_color += ray_color(r, background, world, max_depth);
+	}
 }
 
 hittable_list random_scene()
@@ -162,14 +153,15 @@ hittable_list cornell_box() {
     return objects;
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	// Image
-	double aspect_ratio = 1;
-	int image_width = 400;
+	double aspect_ratio = stoi(argv[1]);
+	int image_width = stoi(argv[2]);
 	int image_height = static_cast<int>(image_width / aspect_ratio);
-	int samples_per_pixel = 400;
-	int max_depth = 32;
+	int samples_per_pixel = stoi(argv[3]);
+	int max_depth = stoi(argv[4]);
+	int scene = stoi(argv[5]);
 
 	// World
 	hittable_list world;
@@ -180,7 +172,7 @@ int main()
 	double aperture = 0.0;
 	color background(0);
 
-	switch(6)
+	switch(scene)
 	{
 		case 1:
 			world = random_scene();
@@ -235,7 +227,9 @@ int main()
 	camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0, 1);
 
 	// Render
-	
+	clock_t t_beg, t_end;
+	t_beg = clock();
+
 	cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
 	for (int y = image_height - 1; y >= 0; y--)
@@ -246,16 +240,13 @@ int main()
 		for (int x = 0; x < image_width; x++)
 		{
 			color pixel_color;
-			for (int s = 0; s < samples_per_pixel; s++)
-			{
-				double u = (x + random_double()) / (image_width - 1);
-				double v = (y + random_double()) / (image_height - 1);
-				ray r = cam.get_ray(u, v);
-				pixel_color += ray_color(r, background, world, max_depth);
-			}
+			sample_pixel(samples_per_pixel, x, y, image_width, image_height, cam, pixel_color, background, world, max_depth, 0);
 			write_color(cout, pixel_color, samples_per_pixel);
 		}
 	}
+
+	t_end = clock();
+	cerr << "\r" << "time " << double(t_end - t_beg) / CLOCKS_PER_SEC << " s " << flush;
 	
 	return 0;
 }
