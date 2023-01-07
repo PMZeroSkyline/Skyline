@@ -39,6 +39,7 @@ public:
         delete[] perm_z;
         delete[] ranvec;
     }
+    
     double noise_hashed(const point3 &p) const
     {
         auto i = static_cast<int>(4*p.x()) & 255;
@@ -87,9 +88,9 @@ public:
         w = w*w*(3-2*w);
         #pragma endregion
         
-        auto i = static_cast<int>(floor(p.x()));
-        auto j = static_cast<int>(floor(p.y()));
-        auto k = static_cast<int>(floor(p.z()));
+        int i = static_cast<int>(floor(p.x()));
+        int j = static_cast<int>(floor(p.y()));
+        int k = static_cast<int>(floor(p.z()));
 
         double c[2][2][2];
 
@@ -109,11 +110,11 @@ public:
         }
         return trilinear_interp(c, u, v, w);
     }
-    double noise_trilinearly_smoothed_shifted(const point3 &p) const
+    double noise_trilinearly_smoothed_ranvec(const point3 &p) const
     {
         double u = p.x() - floor(p.x());
         double v = p.y() - floor(p.y());
-        double w = p.x() - floor(p.z());
+        double w = p.z() - floor(p.z());
 
         int i = static_cast<int>(floor(p.x()));
         int j = static_cast<int>(floor(p.y()));
@@ -202,6 +203,21 @@ public:
             p[target] = tmp;
         }
         
+    }
+    double turb(const point3 &p, int depth = 7) const
+    {
+        double d = noise_trilinearly_smoothed_ranvec(p);
+
+        double accum = 0.0;
+        point3 temp_p = p;
+        double weight = 1.0;
+        for (int i = 0; i < depth; i++)
+        {
+            accum += weight * noise_trilinearly_smoothed_ranvec(temp_p);
+            weight *= 0.5;
+            temp_p *= 2;
+        }
+        return fabs(accum);
     }
 };
 
