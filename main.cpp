@@ -146,8 +146,8 @@ hittable_list cornell_box() {
 
     auto red   = make_shared<lambertian>(color(.65, .05, .05));
     auto white = make_shared<lambertian>(color(.73, .73, .73));
-    auto green = make_shared<lambertian>(color(.12, .45, .15));
-    auto light = make_shared<diffuse_light>(color(15, 15, 15));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(15, 15, 15));
 
 	objects.add(make_shared<box>(point3(130, 0, 65), point3(295, 165, 230), white));
 	objects.add(make_shared<box>(point3(265, 0, 295), point3(430, 330, 460), white));
@@ -166,9 +166,9 @@ int main()
 {
 	// Image
 	double aspect_ratio = 1;
-	int image_width = 200;
+	int image_width = 400;
 	int image_height = static_cast<int>(image_width / aspect_ratio);
-	int samples_per_pixel = 200;
+	int samples_per_pixel = 400;
 	int max_depth = 32;
 
 	// World

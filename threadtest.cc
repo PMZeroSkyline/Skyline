@@ -5,27 +5,20 @@
 
 using namespace std;
 
-void doSomething(int id)
+void download(string downloadName)
 {
-    cout << id << "\n";
+    for (size_t i = 0; i < 100; i++)
+    {
+        this_thread::sleep_for(chrono::milliseconds(30));
+        cout << downloadName + to_string(i) << endl;
+    }
 }
 
-void spawnThreads(int n)
-{
-    vector<thread> threads(n);
-    for (size_t i = 0; i < n; i++)
-    {
-        threads[i] = thread(doSomething, i + 1);
-    }
-    for (auto &t : threads)
-    {
-        t.join();
-    }
-    
-}
 int main()
 {
-    
-    spawnThreads(10);
+    thread t1(download, "download 1 : ");
+    thread t2(download, "download 2 : ");
+    t1.join();
+    t2.join();
     return 0;
 }

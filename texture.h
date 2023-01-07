@@ -1,5 +1,5 @@
 #ifndef TEXTURE_H
-#define TEXUTRE_H
+#define TEXTURE_H
 
 #include "core.h"
 #include "vec3.h"
