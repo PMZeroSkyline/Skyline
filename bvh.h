@@ -71,7 +71,7 @@ bvh_node::bvh_node(const vector<shared_ptr<hittable>> &src_objects, size_t start
         sort(objects.begin() + start, objects.begin() + end, comparator);
         unsigned long long mid = start + object_span/2;
         left = make_shared<bvh_node>(objects, start, mid, time0, time1);
-        right = make_shared<bvh_node>(objects, mid, time0, time1);
+        right = make_shared<bvh_node>(objects, mid, end, time0, time1);
     }
     aabb box_left, box_right;
     if (!left->bounding_box(time0, time1, box_left) || !right->bounding_box(time0, time1, box_right))
