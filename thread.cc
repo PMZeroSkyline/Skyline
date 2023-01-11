@@ -17,11 +17,25 @@ void task(int count)
 
 int main(int argc, char **argv)
 {
-    int thread_count = thread::hardware_concurrency();
+    int thread_count = thread::hardware_concurrency();    
+    int sum_loop_count = 100000000;
+
+    for (int i = 0; i < argc; i++)
+    {
+        string prop = argv[i];
+        if (prop == "-c")
+        {
+            cout << "i am in" << endl;
+            sum_loop_count = stoi(argv[i+1]);
+        }
+        if (prop == "-t")
+        {
+            thread_count = stoi(argv[i+1]);
+        }
+    }
 
     cout << "\nthread_count = " << thread_count << endl;
-    
-    int sum_loop_count = 100000000;
+    cout << "\nsum_loop_count = " << sum_loop_count << endl;
 
     clock_t beg = clock();
 
