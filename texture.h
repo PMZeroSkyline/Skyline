@@ -61,7 +61,8 @@ public:
     virtual color value(double u, double v, const point3 &p) const override
     {
         //return color(1) * noise.turb(scale * p);
-        return color(1) * 0.5 * (1 + noise.noise_hashed(scale * p));
+        //return color(1) * 0.5 * (1 + noise.noise_trilinearly_smoothed_ranvec(scale * p));
+        return color(1) * noise.noise_trilinearly_smoothed_ranvec(scale * p);
     }
 };
 

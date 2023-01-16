@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <time.h>
-
+#include <thread>
 
 using std::shared_ptr;
 using std::make_shared;
@@ -26,6 +26,10 @@ using std::ostream;
 using std::swap;
 using std::sort;
 using std::stoi;
+using std::thread;
+using std::ref;
+using std::pair;
+using std::make_pair;
 
 const double infinity = numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;

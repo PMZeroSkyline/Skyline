@@ -53,7 +53,23 @@ public:
         return (dot(scattered.dir, rec.normal) > 0);
     }
 };
+class metal1 : public material
+{
+public:
+    shared_ptr<texture> albedo;
+    shared_ptr<texture> fuzz;
+    metal1(shared_ptr<texture> a, shared_ptr<texture> f) : albedo(a), fuzz(f){}
+    virtual bool scatter(const ray &r_in, const hit_record &rec, color &attenuation, ray &scattered) const override
+    {
+        color a = albedo->value(rec.u, rec.v, rec.p);
+        double f = fuzz->value(rec.u, rec.v, rec.p).x();
 
+        vec3 reflected = reflect(normalize(r_in.dir), rec.normal);
+        scattered = ray(rec.p, reflected + f * random_in_unit_sphere(), r_in.tm);
+        attenuation = a;
+        return (dot(scattered.dir, rec.normal) > 0);
+    }
+};
 class dielectric : public material
 {
 public:
