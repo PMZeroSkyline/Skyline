@@ -282,7 +282,7 @@ int main(int argc, char **argv)
 	double aspect_ratio = 1;
 	int image_width = 200;
 	int samples_per_pixel = 32;
-	int max_depth = 16;
+	int max_depth = 12;
 	int scene = 0;
 	int thread_count = thread::hardware_concurrency() * 2;
 	#ifdef __APPLE__
