@@ -12,6 +12,7 @@
 #include "box.h"
 #include "constant_medium.h"
 #include "bvh.h"
+#include "z_thread.h"
 
 struct sample_pixel_colors_arg
 {
@@ -25,13 +26,8 @@ struct sample_pixel_colors_arg
     const hittable *world;
     const color *background;
     int max_depth;
-	sample_pixel_colors_arg(){}
-	sample_pixel_colors_arg(int image_height_beg,int image_height_end, int image_height, int image_width,
-	 int samples_per_pixel, const camera *cam, const hittable *world, const color *background, int max_depth) :
-	image_height_beg(image_height_beg),image_height_end(image_height_end),image_height(image_height),image_width(image_width),
-	samples_per_pixel(samples_per_pixel),cam(cam),world(world),background(background),max_depth(max_depth){}
-	void init(int image_height_beg,int image_height_end, int image_height, int image_width,
-	 int samples_per_pixel, const camera *cam, const hittable *world, const color *background, int max_depth)
+	
+	void init(int image_height_beg,int image_height_end, int image_height, int image_width, int samples_per_pixel, const camera *cam, const hittable *world, const color *background, int max_depth)
 	 {
 		this->image_height_beg = image_height_beg;
 		this->image_height_end = image_height_end;
@@ -443,7 +439,7 @@ int main(int argc, char **argv)
 	auto c_beg = system_clock::now();
 	cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-	vector<pthread_t> threads;
+	vector<z_thread> threads;
 	vector<sample_pixel_colors_arg> thread_args;
 	threads.resize(thread_count);
 	thread_args.resize(thread_count);
@@ -453,11 +449,13 @@ int main(int argc, char **argv)
 		int beg = step * i;
 		int end = step * (i+1);
 		thread_args[i].init(beg, end, image_height, image_width, samples_per_pixel, &cam, &world, &background, max_depth);
-		pthread_create(&threads[i], NULL, sample_pixel_colors, (void*)&thread_args[i]);
+		//pthread_create(&threads[i], NULL, sample_pixel_colors, (void*)&thread_args[i]);
+		threads[i].create(sample_pixel_colors, (void*)&thread_args[i]);
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
-		pthread_join(threads[i], NULL);
+		//pthread_join(threads[i], NULL);
+		threads[i].join();
 	}
 
 	for (int i = 0; i < thread_args.size(); i++)

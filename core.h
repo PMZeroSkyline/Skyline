@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <thread>
 #include <chrono>
-#include <unistd.h>
 
 using namespace std;
 using namespace chrono;
@@ -44,6 +43,7 @@ using namespace chrono;
 
 #ifdef __APPLE__
     #include <pthread.h>
+    #include <unistd.h>
 #else
 #endif
 
