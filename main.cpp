@@ -236,8 +236,9 @@ hittable_list final_scene()
 
     objects.add(make_shared<bvh_node>(boxes1, 0, 1));
 
-    auto light = make_shared<diffuse_light>(color(7, 7, 7));
+    auto light = make_shared<diffuse_light>(color(64));
     objects.add(make_shared<xz_rect>(123, 423, 147, 412, 554, light));
+    //objects.add(make_shared<xz_rect>(0, 500, 0, 500, 554, light));
 
     auto center1 = point3(400, 400, 200);
     auto center2 = center1 + vec3(30,0,0);
