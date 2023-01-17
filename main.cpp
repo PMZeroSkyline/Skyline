@@ -13,6 +13,7 @@
 #include "constant_medium.h"
 #include "bvh.h"
 
+
 color ray_color(const ray &r, const color &background, const hittable &world, int depth)
 {
 	hit_record rec;
@@ -278,13 +279,15 @@ hittable_list final_scene()
 
 int main(int argc, char **argv)
 {
+
+
 	// Image
 	double aspect_ratio = 1;
 	int image_width = 200;
 	int samples_per_pixel = 32;
 	int max_depth = 12;
 	int scene = 0;
-	int thread_count = thread::hardware_concurrency() * 2;
+	int thread_count = thread::hardware_concurrency();
 	#ifdef __APPLE__
 		thread_count = 1;
 	#endif
@@ -407,9 +410,7 @@ int main(int argc, char **argv)
 	camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0, 1);
 
 	// Render
-	clock_t t_beg, t_end;
-	t_beg = clock();
-
+	auto c_beg = system_clock::now();
 	cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
 	vector<thread> threads;
@@ -434,9 +435,11 @@ int main(int argc, char **argv)
 			write_color(cout, threads_pixel_colors[i][j], samples_per_pixel);
 		}
 	}
-
-	t_end = clock();
-	cerr << "\r" << "time " << double(t_end - t_beg) / CLOCKS_PER_SEC << " s " << flush;
 	
+	auto c_end = system_clock::now();
+	auto c_diff = duration_cast<microseconds>(c_end - c_beg);
+	cerr << "time " << double(c_diff.count()) * microseconds::period::num / microseconds::period::den << "s" << endl;
+
+
 	return 0;
 }
