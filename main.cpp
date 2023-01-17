@@ -12,7 +12,6 @@
 #include "box.h"
 #include "constant_medium.h"
 #include "bvh.h"
-#include <omp.h>
 
 color ray_color(const ray &r, const color &background, const hittable &world, int depth)
 {
