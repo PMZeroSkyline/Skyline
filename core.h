@@ -9,6 +9,9 @@
 #include <cstdlib>
 #include <algorithm>
 #include <time.h>
+#include <iomanip>
+#include <math.h>
+#include <stdlib.h>
 #include <thread>
 
 using std::shared_ptr;
@@ -30,6 +33,8 @@ using std::thread;
 using std::ref;
 using std::pair;
 using std::make_pair;
+using std::fixed;
+using std::setprecision;
 
 const double infinity = numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;
