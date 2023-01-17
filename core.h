@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <thread>
 #include <chrono>
+#include <unistd.h>
+
 using namespace std;
 using namespace chrono;
 
@@ -38,6 +40,12 @@ using namespace chrono;
 //using std::make_pair;
 //using std::fixed;
 //using std::setprecision;
+
+
+#ifdef __APPLE__
+    #include <pthread.h>
+#else
+#endif
 
 const double infinity = numeric_limits<double>::infinity();
 const double pi = 3.1415926535897932385;

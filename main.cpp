@@ -13,7 +13,37 @@
 #include "constant_medium.h"
 #include "bvh.h"
 
-
+struct sample_pixel_colors_arg
+{
+    vector<color> pixel_colors;
+    int image_height_beg;
+    int image_height_end;
+    int image_height;
+    int image_width;
+    int samples_per_pixel;
+    const camera *cam;
+    const hittable *world;
+    const color *background;
+    int max_depth;
+	sample_pixel_colors_arg(){}
+	sample_pixel_colors_arg(int image_height_beg,int image_height_end, int image_height, int image_width,
+	 int samples_per_pixel, const camera *cam, const hittable *world, const color *background, int max_depth) :
+	image_height_beg(image_height_beg),image_height_end(image_height_end),image_height(image_height),image_width(image_width),
+	samples_per_pixel(samples_per_pixel),cam(cam),world(world),background(background),max_depth(max_depth){}
+	void init(int image_height_beg,int image_height_end, int image_height, int image_width,
+	 int samples_per_pixel, const camera *cam, const hittable *world, const color *background, int max_depth)
+	 {
+		this->image_height_beg = image_height_beg;
+		this->image_height_end = image_height_end;
+		this->image_height = image_height;
+		this->image_width = image_width;
+		this->samples_per_pixel = samples_per_pixel;
+		this->cam = cam;
+		this->world = world;
+		this->background = background;
+		this->max_depth = max_depth;
+	 }
+};
 color ray_color(const ray &r, const color &background, const hittable &world, int depth)
 {
 	hit_record rec;
@@ -47,21 +77,25 @@ void sample_pixel(int samples_per_pixel, int x, int y, int image_width, int imag
 		pixel_color += ray_color(r, background, world, max_depth);
 	}
 }
-vector<color> sample_pixel_colors(vector<color> &pixel_colors, int image_height_beg, int image_height_end, int image_height, int image_width, int samples_per_pixel, const camera &cam, const hittable &world, const color &background, int max_depth)
+void *sample_pixel_colors(void *args)
 {
-	for (int y = image_height_beg; y < image_height_end; y++)
-	{
-		cerr << "thread_id = " << std::this_thread::get_id() << "\t" << to_string((float)(y - image_height_beg) / (float)(image_height_end - image_height_beg) * 100) + "%" << endl;
+	sample_pixel_colors_arg* arg = (sample_pixel_colors_arg*)args;
 
-		for (int x = 0; x < image_width; x++)
+	cerr << "height beg:" << arg->image_height_beg << " end:" << arg->image_height_end << " sample:" << arg->samples_per_pixel << endl;
+
+	for (int y = arg->image_height_beg; y < arg->image_height_end; y++)
+	{
+		cerr << "thread_id = " << std::this_thread::get_id() << "\t" << to_string((float)(y - arg->image_height_beg) / (float)(arg->image_height_end - arg->image_height_beg) * 100) + "%" << endl;
+
+		for (int x = 0; x < arg->image_width; x++)
 		{
 			color pixel_color;
 
-			sample_pixel(samples_per_pixel, x, image_height-y, image_width, image_height, cam, pixel_color, background, world, max_depth);
-			pixel_colors.push_back(pixel_color);
+			sample_pixel(arg->samples_per_pixel, x, arg->image_height-y, arg->image_width, arg->image_height, *arg->cam, pixel_color, *arg->background, *arg->world, arg->max_depth);
+			arg->pixel_colors.push_back(pixel_color);
 		}
 	}
-	return pixel_colors;
+	return NULL;
 }
 hittable_list sphere_with_ground()
 {
@@ -279,8 +313,6 @@ hittable_list final_scene()
 
 int main(int argc, char **argv)
 {
-
-
 	// Image
 	double aspect_ratio = 1;
 	int image_width = 200;
@@ -288,9 +320,7 @@ int main(int argc, char **argv)
 	int max_depth = 12;
 	int scene = 0;
 	int thread_count = thread::hardware_concurrency();
-	#ifdef __APPLE__
-		thread_count = 1;
-	#endif
+
 
 	// Init
 	for (int i = 0; i < argc; i++)
@@ -413,26 +443,28 @@ int main(int argc, char **argv)
 	auto c_beg = system_clock::now();
 	cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-	vector<thread> threads;
-	vector<vector<color>> threads_pixel_colors;
+	vector<pthread_t> threads;
+	vector<sample_pixel_colors_arg> thread_args;
 	threads.resize(thread_count);
-	threads_pixel_colors.resize(thread_count);
+	thread_args.resize(thread_count);
 	for (int i = 0; i < thread_count; i++)
 	{
 		int step = image_height / thread_count;
 		int beg = step * i;
 		int end = step * (i+1);
-		threads[i] = thread(sample_pixel_colors, ref(threads_pixel_colors[i]),beg, end, image_height, image_width, samples_per_pixel, cam, world, background, max_depth);
+		thread_args[i].init(beg, end, image_height, image_width, samples_per_pixel, &cam, &world, &background, max_depth);
+		pthread_create(&threads[i], NULL, sample_pixel_colors, (void*)&thread_args[i]);
 	}
 	for (int i = 0; i < threads.size(); i++)
 	{
-		threads[i].join();
+		pthread_join(threads[i], NULL);
 	}
-	for (int i = 0; i < threads_pixel_colors.size(); i++)
+
+	for (int i = 0; i < thread_args.size(); i++)
 	{
-		for (int j = 0; j < threads_pixel_colors[i].size(); j++)
+		for (int j = 0; j < thread_args[i].pixel_colors.size(); j++)
 		{
-			write_color(cout, threads_pixel_colors[i][j], samples_per_pixel);
+			write_color(cout, thread_args[i].pixel_colors[j], thread_args[i].samples_per_pixel);
 		}
 	}
 	
